@@ -1,4 +1,4 @@
-package com.userAuthentication.Model;
+package com.csvFileProcessor.Model;
 
 import lombok.Data;
 

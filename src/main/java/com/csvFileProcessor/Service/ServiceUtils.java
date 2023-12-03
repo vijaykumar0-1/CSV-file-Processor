@@ -1,8 +1,8 @@
-package com.userAuthentication.Service;
+package com.csvFileProcessor.Service;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import com.userAuthentication.Model.CustomData;
+import com.csvFileProcessor.Model.CustomData;
 import lombok.experimental.UtilityClass;
 
 import java.io.FileReader;
