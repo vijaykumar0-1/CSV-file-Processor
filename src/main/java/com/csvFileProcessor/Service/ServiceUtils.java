@@ -1,29 +1,35 @@
 package com.csvFileProcessor.Service;
 
+import com.csvFileProcessor.Model.CustomData;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import com.csvFileProcessor.Model.CustomData;
 import lombok.experimental.UtilityClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
 
 @UtilityClass
 public class ServiceUtils {
-    public static String processCSVFile(String csvFilePath) {
+    private static final Logger logger = LoggerFactory.getLogger(ServiceUtils.class);
 
+    public static String processCSVFile(MultipartFile file, String conditionColumnName, String conditionValue) {
         CustomData customData = new CustomData();
-        try (CSVReader reader = new CSVReader(new FileReader(csvFilePath))) {
+
+        try (CSVReader reader = new CSVReader(new BufferedReader(new InputStreamReader(file.getInputStream())))) {
             // Read the header to get column names
             String[] header = reader.readNext();
 
             // Map to store column indices
             Map<String, Integer> columnIndexMap = new HashMap<>();
             for (int i = 0; i < header.length; i++) {
-                columnIndexMap.put(header[i], i);
+                columnIndexMap.put(header[i].toLowerCase(), i);
             }
 
             // Variables for statistics
@@ -36,31 +42,37 @@ public class ServiceUtils {
                 totalRecords++;
 
                 // Example: Search for a record with a specific condition
-                String conditionColumnName = "Age";
-                String conditionValue = "25";
-                int conditionColumnIndex = columnIndexMap.get(conditionColumnName);
-                String valueInConditionColumn = nextLine[conditionColumnIndex];
+                Integer conditionColumnIndex = columnIndexMap.get(conditionColumnName.toLowerCase());
 
-                if (valueInConditionColumn.equals(conditionValue)) {
-                    // Found a record that matches the condition
-                    searchCount++;
-                    // Perform further processing or print the record
-                    System.out.println("Found matching record: " + String.join(", ", nextLine));
+                if (conditionColumnIndex != null) {
+                    String valueInConditionColumn = nextLine[conditionColumnIndex];
+
+                    logger.debug("Condition column index: {}", conditionColumnIndex);
+                    logger.debug("Value in condition column: {}", valueInConditionColumn);
+
+                    if (valueInConditionColumn != null && valueInConditionColumn.equalsIgnoreCase(conditionValue)) {
+                        // Found a record that matches the condition
+                        searchCount++;
+                        // Perform further processing or print the record
+                        System.out.println("Found matching record: " + String.join(", ", nextLine));
+                    }
+                } else {
+                    // Handle the case where the condition column is not found in the header
+                    System.out.println("Condition column not found in the header");
                 }
 
                 // You can add more logic for other statistics
             }
 
+            // Print overall statistics
+
             customData.setSearchCount(searchCount);
             customData.setTotalRecords(totalRecords);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (CsvValidationException e) {
-            throw new RuntimeException(e);
+        } catch (IOException | CsvValidationException e) {
+            logger.error("Error processing CSV file", e);
         }
 
         return customData.toString();
-
     }
 }
