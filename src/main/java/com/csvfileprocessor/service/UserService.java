@@ -7,8 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserService {
 
     public String getResult(MultipartFile file, String conditionColumnName, String conditionValue) {
-        String result = ServiceUtils.processCSVFile(file,conditionColumnName,conditionValue);
-        return result;
+        return ServiceUtils.processCSVFile(file,conditionColumnName,conditionValue);
     }
 }
 
