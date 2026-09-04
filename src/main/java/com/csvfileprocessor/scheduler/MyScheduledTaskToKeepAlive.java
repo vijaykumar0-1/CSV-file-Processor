@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
 public class MyScheduledTaskToKeepAlive {
 
     @Scheduled(fixedRate = 840000)
-    public void keepAlive()
-    {
+    public void keepAlive() {
         System.out.println("Scheduled task executed to keep server Alive");
     }
 }
